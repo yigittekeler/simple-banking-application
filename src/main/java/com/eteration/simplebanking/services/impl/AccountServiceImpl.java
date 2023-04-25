@@ -5,10 +5,7 @@ import com.eteration.simplebanking.dto.TransactionStatus;
 import com.eteration.simplebanking.dto.AccountDto;
 import com.eteration.simplebanking.dto.TransactionDto;
 import com.eteration.simplebanking.exception.InsufficientBalanceException;
-import com.eteration.simplebanking.model.Account;
-import com.eteration.simplebanking.model.DepositTransaction;
-import com.eteration.simplebanking.model.Transaction;
-import com.eteration.simplebanking.model.WithdrawalTransaction;
+import com.eteration.simplebanking.model.*;
 import com.eteration.simplebanking.repository.AccountRepository;
 import com.eteration.simplebanking.services.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +61,20 @@ public class AccountServiceImpl implements AccountService {
         Account account = findAccount(accountNumber);
 
         account.post(new DepositTransaction(amount,account));
+        accountRepository.save(account);
+
+        return TransactionStatus.builder()
+                .status("OK")
+                .approvalCode(account.getTransactions().get(account.getTransactions().size() - 1).getApprovalCode())
+                .build();
+
+    }
+
+    @Override
+    public TransactionStatus phoneBillPayment(String accountNumber, Double amount,String phoneNumber, String provider) throws InsufficientBalanceException {
+        Account account = findAccount(accountNumber);
+
+        account.post(new PhoneBillPaymentTransaction(phoneNumber,provider,amount,account));
         accountRepository.save(account);
 
         return TransactionStatus.builder()

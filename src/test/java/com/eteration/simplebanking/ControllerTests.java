@@ -3,6 +3,7 @@ package com.eteration.simplebanking;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.eteration.simplebanking.dto.TransactionStatus;
 import com.eteration.simplebanking.exception.InsufficientBalanceException;
 import com.eteration.simplebanking.model.Account;
 import com.eteration.simplebanking.repository.AccountRepository;
@@ -27,35 +28,45 @@ class ControllerTests  {
 
     @InjectMocks
     private AccountServiceImpl accountService;
-//
-//
-//    @Test
-//    public void givenId_Credit_thenReturnJson()
-//    throws Exception {
-//
-//        Account account = new Account("Kerem Karaca", "17892");
-//
-//        doReturn(account).when(service).findAccount( "17892");
-//        ResponseEntity<TransactionStatus> result = controller.credit( "17892", new DepositTransaction(1000.0));
-//        verify(service, times(1)).findAccount("17892");
-//        assertEquals("OK", result.getBody().getStatus());
-//    }
-//
-//    @Test
-//    public void givenId_CreditAndThenDebit_thenReturnJson()
-//    throws Exception {
-//
-//        Account account = new Account("Kerem Karaca", "17892");
-//
-//        doReturn(account).when(service).findAccount( "17892");
-//        ResponseEntity<TransactionStatus> result = controller.credit( "17892", new DepositTransaction(1000.0));
-//        ResponseEntity<TransactionStatus> result2 = controller.debit( "17892", new WithdrawalTransaction(50.0));
-//        verify(service, times(2)).findAccount("17892");
-//        assertEquals("OK", result.getBody().getStatus());
-//        assertEquals("OK", result2.getBody().getStatus());
-//        assertEquals(950.0, account.getBalance(),0.001);
-//    }
-//
+
+
+    @Test
+    public void givenId_DebitWithMoreValueGetException_thenReturnJson()
+    {
+
+        Account account = new Account("yigit tekeler", "1234567890");
+
+        Mockito.when(accountRepository.findByAccountNumber("1234567890")).thenReturn(Optional.of(account));
+
+        assertThrows(InsufficientBalanceException.class, () -> {
+            accountService.debit("1234567890", 1d);
+        });
+
+        Mockito.verify(accountRepository, Mockito.times(1)).findByAccountNumber("1234567890");
+    }
+
+    @Test
+    public void givenId_CreditAndThenDebit_thenReturnJson()
+    throws Exception {
+
+        Account account = new Account("yigit tekeler", "1234567890");
+
+        Mockito.when(accountRepository.findByAccountNumber("1234567890")).thenReturn(Optional.of(account));
+
+        TransactionStatus ts1 = accountService.credit("1234567890", 200d);
+        assertEquals(account.getBalance(),200d);
+        TransactionStatus ts2 =accountService.debit("1234567890", 160d);
+
+        assertEquals("OK", ts1.getStatus());
+        assertEquals("OK", ts2.getStatus());
+        assertEquals(40d, account.getBalance(),0.001);
+
+        Mockito.verify(accountRepository, Mockito.times(2)).findByAccountNumber("1234567890");
+        Mockito.verify(accountRepository, Mockito.times(2)).save(account);
+
+
+    }
+
     @Test
     public void givenId_CreditAndThenDebitMoreGetException_thenReturnJson() {
 
@@ -70,18 +81,5 @@ class ControllerTests  {
         Mockito.verify(accountRepository, Mockito.times(2)).findByAccountNumber("1234567890");
         Mockito.verify(accountRepository, Mockito.times(1)).save(account);
     }
-
-//
-//    @Test
-//    public void givenId_GetAccount_thenReturnJson()
-//    throws Exception {
-//
-//        Account account = new Account("Kerem Karaca", "17892");
-//
-//        doReturn(account).when(service).findAccount( "17892");
-//        ResponseEntity<Account> result = controller.getAccount(17892);
-//        verify(service, times(1)).findAccount("17892");
-//        assertEquals(account, result.getBody());
-//    }
 
 }

@@ -11,4 +11,6 @@ public interface AccountService {
     TransactionStatus debit(String accountNumber, Double amount) throws InsufficientBalanceException;
 
     TransactionStatus credit(String accountNumber, Double amount) throws InsufficientBalanceException;
+
+    TransactionStatus phoneBillPayment(String accountNumber, Double amount,String phoneNumber, String provider) throws InsufficientBalanceException;
 }

@@ -47,7 +47,6 @@ public abstract class Transaction {
 
     @PrePersist
     protected void prePersist() {
-//        this.date = LocalDateTime.now();
         this.approvalCode = UUID.randomUUID();
     }
 }
